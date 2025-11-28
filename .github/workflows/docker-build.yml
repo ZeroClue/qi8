@@ -19,20 +19,38 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     permissions:
       contents: read
       packages: write
 
     steps:
-    - name: Clear system space for build
+    - name: Enhanced System Cleanup
       run: |
-        echo "Cleaning up system space..."
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /opt/ghc
-        sudo rm -rf "/usr/local/share/boost"
+        echo "Performing enhanced system cleanup..."
+        echo "Disk space before cleanup:"
+        df -h
+
+        # Remove large directories that consume space (RunPod's approach)
+        rm -rf /usr/share/dotnet
+        rm -rf /opt/ghc
+        rm -rf "/usr/local/share/boost"
+        rm -rf "$AGENT_TOOLSDIRECTORY"
+
+        # Clean package caches
         sudo apt-get clean
-        docker system prune -af
+        sudo rm -rf /var/lib/apt/lists/*
+
+        # Clean temporary files
+        sudo rm -rf /tmp/*
+        sudo rm -rf /var/tmp/*
+
+        # Docker cleanup (less aggressive to avoid issues)
+        docker system prune -f --volumes || true
+        docker builder prune -f || true
+
+        echo "Disk space after cleanup:"
+        df -h
 
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -66,6 +84,15 @@ jobs:
           type=semver,pattern={{major}}
           type=sha
 
+    - name: Monitor Disk Space Before Build
+      run: |
+        echo "=== DISK SPACE BEFORE DOCKER BUILD ==="
+        df -h
+        echo "=== DOCKER SYSTEM USAGE BEFORE BUILD ==="
+        docker system df
+        echo "=== AVAILABLE MEMORY ==="
+        free -h
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
@@ -79,8 +106,16 @@ jobs:
         build-args: |
           HF_TOKEN=${{ secrets.HUGGINGFACE_TOKEN }}
 
+    - name: Monitor Disk Space After Build
+      run: |
+        echo "=== DISK SPACE AFTER DOCKER BUILD ==="
+        df -h
+        echo "=== DOCKER SYSTEM USAGE AFTER BUILD ==="
+        docker system df
+        echo "=== BUILD COMPLETED SUCCESSFULLY ==="
+
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     needs: build
     if: github.event_name != 'pull_request'
 
