@@ -1,0 +1,14 @@
+.git
+.gitignore
+README.md
+Dockerfile*
+.github
+*.md
+.env
+.env.*
+.DS_Store
+.vscode
+*.log
+node_modules
+coverage
+.nyc_output
