@@ -5,7 +5,7 @@ Deploy your Qwen Image Model container on RunPod serverless infrastructure for s
 ## Prerequisites
 
 ### Required Accounts
-- **RunPod Account**: Sign up at [runpod.io](https://runpod.io)
+- **RunPod Account**: Sign up at [runpod.io](https://runpod.io?ref=lnnwdl3q)
 - **Docker Hub Account**: For container registry access
 - **GitHub Account**: For CI/CD pipeline (optional)
 

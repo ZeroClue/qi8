@@ -119,3 +119,6 @@ temp/
 #claude
 .claude/
 CLAUDE.md
+
+# Documentation (if you want to ignore setup docs)
+SETUP.md
